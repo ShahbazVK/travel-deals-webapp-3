@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cruises | TravelDeals</title>
+  <link rel="stylesheet" href="css/mystyle.css">
+  <script src="js/dark-mode-init.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header></header>
+    <nav class="main-nav"></nav>
+    <div class="content-wrapper">
+      <aside class="sidebar"></aside>
+      <main class="main-content">
+        <h2>Discover Amazing Cruises</h2>
+        <p>Set sail to incredible destinations with our curated cruise packages.</p>
+
+        <div class="form-container">
+          <form id="cruises-form">
+            <div class="form-group">
+              <label for="cruise-destination">Destination</label>
+              <select id="cruise-destination" class="form-control">
+                <option value="">Select a destination</option>
+                <option value="alaska">Alaska</option>
+                <option value="bahamas">Bahamas</option>
+                <option value="europe">Europe</option>
+                <option value="mexico">Mexico</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="cruise-departure">Departure Date</label>
+              <input type="date" id="cruise-departure" class="form-control" min="2024-09-01" max="2024-12-01">
+            </div>
+
+            <div class="form-group">
+              <label for="min-duration">Minimum Duration (days)</label>
+              <input type="number" id="min-duration" class="form-control" min="3" max="10" value="3">
+            </div>
+
+            <div class="form-group">
+              <label for="max-duration">Maximum Duration (days)</label>
+              <input type="number" id="max-duration" class="form-control" min="3" max="10" value="7">
+            </div>
+
+            <div class="form-group">
+              <label>Cruise Guests</label>
+              <div class="passenger-selector">
+                <button type="button" id="cruise-guests-toggle" class="btn-small">👥 Select Guests</button>
+                <span id="cruise-guests-summary">2 Adults</span>
+              </div>
+
+              <div id="cruise-guests-form"
+                style="display: none; margin-top: 1rem; padding: 1rem; background-color: var(--light-background); border-radius: var(--border-radius);">
+                <div class="passenger-count">
+                  <span>Adults (18+ years)</span>
+                  <button type="button" class="count-btn cruise-adult-decrease">-</button>
+                  <span class="count-display" id="cruise-adult-count">2</span>
+                  <button type="button" class="count-btn cruise-adult-increase">+</button>
+                </div>
+
+                <div class="passenger-count">
+                  <span>Children (0-17 years)</span>
+                  <button type="button" class="count-btn cruise-child-decrease">-</button>
+                  <span class="count-display" id="cruise-child-count">0</span>
+                  <button type="button" class="count-btn cruise-child-increase">+</button>
+                </div>
+
+                <div class="passenger-count">
+                  <span>Infants (under 2 years)</span>
+                  <button type="button" class="count-btn cruise-infant-decrease">-</button>
+                  <span class="count-display" id="cruise-infant-count">0</span>
+                  <button type="button" class="count-btn cruise-infant-increase">+</button>
+                </div>
+
+                <button type="button" id="cruise-guests-done" class="btn-small" style="margin-top: 1rem;">Done</button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Search Cruises</button>
+          </form>
+        </div>
+
+        <div id="cruises-results" class="results-container">
+          <div class="results-header">
+            <h3>Cruise Search Results</h3>
+          </div>
+          <div id="cruises-results-content">
+            <!-- Results will be displayed here -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <footer></footer>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

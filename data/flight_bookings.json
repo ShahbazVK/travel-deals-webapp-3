@@ -1,0 +1,104 @@
+[
+    {
+        "bookingNumber": "BK1762402472860",
+        "userId": 1512638678,
+        "userPhone": "(469)305-9536",
+        "flights": [
+            {
+                "type": "flight",
+                "flightId": "AA173",
+                "origin": "Los Angeles",
+                "destination": "Dallas",
+                "departureDate": "2024-12-01",
+                "arrivalDate": "2024-12-01",
+                "departureTime": "06:45",
+                "arrivalTime": "11:30",
+                "totalPrice": 439,
+                "adultCount": 1,
+                "childCount": 0,
+                "infantCount": 0,
+                "tripSegment": "outbound"
+            }
+        ],
+        "passengers": [
+            {
+                "firstName": "Shahbaz",
+                "lastName": "Ali",
+                "dob": "2025-11-05",
+                "ssn": "4849393839839839"
+            }
+        ],
+        "totalPrice": 439,
+        "bookingDate": "2025-11-06T04:14:32.890Z"
+    },
+    {
+        "bookingNumber": "BK1762405612600",
+        "userId": 1512638678,
+        "userPhone": "(469)305-9536",
+        "flights": [
+            {
+                "type": "flight",
+                "flightId": "UA183",
+                "origin": "Dallas",
+                "destination": "Los Angeles",
+                "departureDate": "2024-12-01",
+                "arrivalDate": "2024-12-01",
+                "departureTime": "15:00",
+                "arrivalTime": "17:30",
+                "totalPrice": 898,
+                "adultCount": 2,
+                "childCount": 0,
+                "infantCount": 0,
+                "tripSegment": "return"
+            }
+        ],
+        "passengers": [
+            {
+                "firstName": "Shahbaz",
+                "lastName": "Ali",
+                "dob": "2025-10-31",
+                "ssn": "98439483938938334"
+            },
+            {
+                "firstName": "Shahbaz",
+                "lastName": "Ali",
+                "dob": "2025-11-07",
+                "ssn": "43oi43o3io3i"
+            }
+        ],
+        "totalPrice": 898,
+        "bookingDate": "2025-11-06T05:06:52.614Z"
+    },
+    {
+        "bookingNumber": "BK1762405782887",
+        "userId": 1512638678,
+        "userPhone": "(469)305-9536",
+        "flights": [
+            {
+                "type": "flight",
+                "flightId": "AA173",
+                "origin": "Los Angeles",
+                "destination": "Dallas",
+                "departureDate": "2024-12-01",
+                "arrivalDate": "2024-12-01",
+                "departureTime": "06:45",
+                "arrivalTime": "11:30",
+                "totalPrice": 439,
+                "adultCount": 1,
+                "childCount": 0,
+                "infantCount": 0,
+                "tripSegment": "outbound"
+            }
+        ],
+        "passengers": [
+            {
+                "firstName": "Shahbaz",
+                "lastName": "Ali",
+                "dob": "2025-11-07",
+                "ssn": "4849393839839839"
+            }
+        ],
+        "totalPrice": 439,
+        "bookingDate": "2025-11-06T05:09:42.898Z"
+    }
+]

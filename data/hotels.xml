@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hotels>
+  <hotel>
+    <hotelId>H001</hotelId>
+    <hotelName>Grand Los Angeles Resort</hotelName>
+    <city>Los Angeles</city>
+    <availableRooms>25</availableRooms>
+    <date>2024-09-01</date>
+    <pricePerNight>189</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H002</hotelId>
+    <hotelName>San Francisco Bay View Hotel</hotelName>
+    <city>San Francisco</city>
+    <availableRooms>18</availableRooms>
+    <date>2024-09-05</date>
+    <pricePerNight>249</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H003</hotelId>
+    <hotelName>Downtown Houston Plaza</hotelName>
+    <city>Houston</city>
+    <availableRooms>32</availableRooms>
+    <date>2024-09-10</date>
+    <pricePerNight>159</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H004</hotelId>
+    <hotelName>Dallas Metropolitan Inn</hotelName>
+    <city>Dallas</city>
+    <availableRooms>28</availableRooms>
+    <date>2024-09-15</date>
+    <pricePerNight>149</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H005</hotelId>
+    <hotelName>San Diego Ocean Breeze</hotelName>
+    <city>San Diego</city>
+    <availableRooms>22</availableRooms>
+    <date>2024-09-20</date>
+    <pricePerNight>199</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H006</hotelId>
+    <hotelName>Austin State Capitol Lodge</hotelName>
+    <city>Austin</city>
+    <availableRooms>19</availableRooms>
+    <date>2024-09-25</date>
+    <pricePerNight>139</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H007</hotelId>
+    <hotelName>Sacramento Valley Inn</hotelName>
+    <city>Sacramento</city>
+    <availableRooms>21</availableRooms>
+    <date>2024-10-01</date>
+    <pricePerNight>169</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H008</hotelId>
+    <hotelName>San Jose Tech Hub Hotel</hotelName>
+    <city>San Jose</city>
+    <availableRooms>16</availableRooms>
+    <date>2024-10-05</date>
+    <pricePerNight>229</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H009</hotelId>
+    <hotelName>Fresno Central Station Hotel</hotelName>
+    <city>Fresno</city>
+    <availableRooms>14</availableRooms>
+    <date>2024-10-10</date>
+    <pricePerNight>119</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H010</hotelId>
+    <hotelName>San Antonio River Walk Inn</hotelName>
+    <city>San Antonio</city>
+    <availableRooms>27</availableRooms>
+    <date>2024-10-15</date>
+    <pricePerNight>144</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H011</hotelId>
+    <hotelName>Fort Worth Western Lodge</hotelName>
+    <city>Fort Worth</city>
+    <availableRooms>23</availableRooms>
+    <date>2024-10-20</date>
+    <pricePerNight>134</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H012</hotelId>
+    <hotelName>El Paso Border View Hotel</hotelName>
+    <city>El Paso</city>
+    <availableRooms>20</availableRooms>
+    <date>2024-10-25</date>
+    <pricePerNight>124</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H013</hotelId>
+    <hotelName>Los Angeles Beverly Hills Suites</hotelName>
+    <city>Los Angeles</city>
+    <availableRooms>15</availableRooms>
+    <date>2024-11-01</date>
+    <pricePerNight>299</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H014</hotelId>
+    <hotelName>San Francisco Golden Gate View</hotelName>
+    <city>San Francisco</city>
+    <availableRooms>12</availableRooms>
+    <date>2024-11-05</date>
+    <pricePerNight>269</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H015</hotelId>
+    <hotelName>Houston NASA Space Center Lodge</hotelName>
+    <city>Houston</city>
+    <availableRooms>29</availableRooms>
+    <date>2024-11-10</date>
+    <pricePerNight>179</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H016</hotelId>
+    <hotelName>Dallas Cowboys Stadium Hotel</hotelName>
+    <city>Dallas</city>
+    <availableRooms>14</availableRooms>
+    <date>2024-11-15</date>
+    <pricePerNight>189</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H017</hotelId>
+    <hotelName>San Diego Coronado Island Resort</hotelName>
+    <city>San Diego</city>
+    <availableRooms>18</availableRooms>
+    <date>2024-11-20</date>
+    <pricePerNight>219</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H018</hotelId>
+    <hotelName>Austin Music Scene Hotel</hotelName>
+    <city>Austin</city>
+    <availableRooms>24</availableRooms>
+    <date>2024-11-25</date>
+    <pricePerNight>154</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H019</hotelId>
+    <hotelName>Sacramento Government Plaza Hotel</hotelName>
+    <city>Sacramento</city>
+    <availableRooms>20</availableRooms>
+    <date>2024-11-30</date>
+    <pricePerNight>174</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H020</hotelId>
+    <hotelName>San Jose Silicon Valley Inn</hotelName>
+    <city>San Jose</city>
+    <availableRooms>17</availableRooms>
+    <date>2024-09-01</date>
+    <pricePerNight>234</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H021</hotelId>
+    <hotelName>Fresno Agricultural Fair Hotel</hotelName>
+    <city>Fresno</city>
+    <availableRooms>13</availableRooms>
+    <date>2024-09-08</date>
+    <pricePerNight>109</pricePerNight>
+  </hotel>
+  <hotel>
+    <hotelId>H022</hotelId>
+    <hotelName>Los Angeles Hollywood Hills</hotelName>
+    <city>Los Angeles</city>
+    <availableRooms>10</availableRooms>
+    <date>2024-10-01</date>
+    <pricePerNight>319</pricePerNight>
+  </hotel>
+</hotels>

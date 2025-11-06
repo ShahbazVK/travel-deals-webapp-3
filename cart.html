@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart | TravelDeals</title>
+  <link rel="stylesheet" href="css/mystyle.css">
+  <script src="js/dark-mode-init.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header></header>
+    <nav class="main-nav"></nav>
+    <div class="content-wrapper">
+      <aside class="sidebar"></aside>
+      <main class="main-content">
+        <h2>Your Cart</h2>
+        <p>Review your selected items before completing your booking.</p>
+
+        <div id="cart-container">
+          <!-- Cart items will be displayed here -->
+        </div>
+
+        <div id="booking-form-container" style="display: none;" class="form-container">
+          <h3>Passenger Information</h3>
+          <form id="passenger-booking-form">
+            <div id="passenger-inputs"></div>
+            <div class="form-group">
+              <label for="user-phone">Your Phone Number *</label>
+              <input type="text" id="user-phone" class="form-control" placeholder="(123)456-7890">
+            </div>
+            <button type="submit" class="btn-primary">Complete Booking</button>
+          </form>
+        </div>
+
+        <div id="booking-confirmation" style="display: none;" class="results-container">
+          <!-- Booking confirmation will be displayed here -->
+        </div>
+      </main>
+    </div>
+
+    <footer></footer>
+  </div>
+  <script src="js/app.js"></script>
+  <script>
+    // Load cart and display items
+    document.addEventListener('DOMContentLoaded', function() {
+      // Always load from sessionStorage on cart page (in case app.js initialized empty cart)
+      if (typeof sessionStorage !== 'undefined') {
+        const cartData = sessionStorage.getItem('travelCart');
+        
+        if (cartData) {
+          try {
+            const parsedCart = JSON.parse(cartData);
+            // Always use sessionStorage data on cart page (it's the source of truth)
+            window.cart = parsedCart;
+            
+            if (window.cart.length > 0) {
+              displayCartItems(window.cart);
+            } else {
+              document.getElementById('cart-container').innerHTML = '<p>Your cart is empty.</p>';
+            }
+          } catch (e) {
+            console.error('Error parsing cart data:', e);
+            window.cart = [];
+            document.getElementById('cart-container').innerHTML = '<p>Your cart is empty.</p>';
+          }
+        } else {
+          window.cart = [];
+          document.getElementById('cart-container').innerHTML = '<p>Your cart is empty.</p>';
+        }
+      } else {
+        window.cart = window.cart || [];
+        if (window.cart.length === 0) {
+          document.getElementById('cart-container').innerHTML = '<p>Your cart is empty.</p>';
+        } else {
+          displayCartItems(window.cart);
+        }
+      }
+    });
+
+    function displayCartItems(cart) {
+      const container = document.getElementById('cart-container');
+      let html = '<div class="form-container">';
+      let totalPrice = 0;
+      let totalPassengers = 0;
+
+      cart.forEach((item, index) => {
+        totalPrice += item.totalPrice;
+        
+        if (item.type === 'flight') {
+          totalPassengers += (item.adultCount + item.childCount + item.infantCount);
+          html += `
+            <div style="border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1rem;">
+              <h4>${item.tripSegment === 'outbound' ? 'Outbound' : 'Return'} Flight</h4>
+              <div class="results-details">
+                <div class="detail-item">
+                  <div class="detail-label">Flight ID</div>
+                  <div class="detail-value">${item.flightId}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Route</div>
+                  <div class="detail-value">${item.origin} → ${item.destination}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Departure</div>
+                  <div class="detail-value">${item.departureDate} at ${item.departureTime}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Arrival</div>
+                  <div class="detail-value">${item.arrivalDate} at ${item.arrivalTime}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Passengers</div>
+                  <div class="detail-value">${item.adultCount} Adults, ${item.childCount} Children, ${item.infantCount} Infants</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Price</div>
+                  <div class="detail-value" style="font-weight: bold; color: var(--secondary-color);">$${item.totalPrice.toFixed(2)}</div>
+                </div>
+              </div>
+              <button onclick="removeFromCart(${index})" class="btn-small" style="margin-top: 1rem; background-color: #d93025;">Remove</button>
+            </div>
+          `;
+        } else if (item.type === 'hotel') {
+          const roomsNeeded = item.nights || Math.ceil((new Date(item.checkOut) - new Date(item.checkIn)) / (1000 * 60 * 60 * 24));
+          html += `
+            <div style="border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1rem;">
+              <h4>Hotel Booking</h4>
+              <div class="results-details">
+                <div class="detail-item">
+                  <div class="detail-label">Hotel ID</div>
+                  <div class="detail-value">${item.hotelId}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Hotel Name</div>
+                  <div class="detail-value">${item.hotelName}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">City</div>
+                  <div class="detail-value">${item.city}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Check-in</div>
+                  <div class="detail-value">${item.checkIn}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Check-out</div>
+                  <div class="detail-value">${item.checkOut}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Guests</div>
+                  <div class="detail-value">${item.adultCount} Adults, ${item.childCount} Children, ${item.infantCount} Infants</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Number of Rooms</div>
+                  <div class="detail-value">${item.roomsNeeded || '1'}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Price per Night</div>
+                  <div class="detail-value">$${item.pricePerNight}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Total Price</div>
+                  <div class="detail-value" style="font-weight: bold; color: var(--secondary-color);">$${item.totalPrice.toFixed(2)}</div>
+                </div>
+              </div>
+              <button onclick="removeFromCart(${index})" class="btn-small" style="margin-top: 1rem; background-color: #d93025;">Remove</button>
+            </div>
+          `;
+        } else if (item.type === 'car') {
+          html += `
+            <div style="border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1rem;">
+              <h4>Car Rental</h4>
+              <div class="results-details">
+                <div class="detail-item">
+                  <div class="detail-label">Car ID</div>
+                  <div class="detail-value">${item.carId}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">City</div>
+                  <div class="detail-value">${item.city}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Car Type</div>
+                  <div class="detail-value">${item.carType}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Pick-up</div>
+                  <div class="detail-value">${item.pickupDate}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Drop-off</div>
+                  <div class="detail-value">${item.dropoffDate}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Price per Day</div>
+                  <div class="detail-value">$${item.pricePerDay}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Total Price</div>
+                  <div class="detail-value" style="font-weight: bold; color: var(--secondary-color);">$${item.totalPrice.toFixed(2)}</div>
+                </div>
+              </div>
+              <button onclick="removeFromCart(${index})" class="btn-small" style="margin-top: 1rem; background-color: #d93025;">Remove</button>
+            </div>
+          `;
+        } else if (item.type === 'cruise') {
+          html += `
+            <div style="border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1rem;">
+              <h4>Cruise</h4>
+              <div class="results-details">
+                <div class="detail-item">
+                  <div class="detail-label">Cruise ID</div>
+                  <div class="detail-value">${item.cruiseId}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Ship</div>
+                  <div class="detail-value">${item.shipName}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Destination</div>
+                  <div class="detail-value">${item.destination}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Departure</div>
+                  <div class="detail-value">${item.departureDate}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Duration</div>
+                  <div class="detail-value">${item.duration} days</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Passengers</div>
+                  <div class="detail-value">${item.adultCount} Adults, ${item.childCount} Children, ${item.infantCount} Infants</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Total Price</div>
+                  <div class="detail-value" style="font-weight: bold; color: var(--secondary-color);">$${item.totalPrice.toFixed(2)}</div>
+                </div>
+              </div>
+              <button onclick="removeFromCart(${index})" class="btn-small" style="margin-top: 1rem; background-color: #d93025;">Remove</button>
+            </div>
+          `;
+        }
+      });
+
+      html += `
+        <div style="border-top: 2px solid var(--primary-color); padding-top: 1rem; margin-top: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Total: $${totalPrice.toFixed(2)}</h3>
+            <button onclick="proceedToBooking(${totalPassengers})" class="btn-primary">Proceed to Booking</button>
+          </div>
+        </div>
+      `;
+      html += '</div>';
+      container.innerHTML = html;
+      window.cart = cart;
+    }
+
+    function removeFromCart(index) {
+      if (!window.cart) {
+        if (typeof sessionStorage !== 'undefined') {
+          const cartData = sessionStorage.getItem('travelCart');
+          window.cart = cartData ? JSON.parse(cartData) : [];
+        } else {
+          window.cart = [];
+        }
+      }
+      window.cart.splice(index, 1);
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('travelCart', JSON.stringify(window.cart));
+      }
+      displayCartItems(window.cart);
+    }
+
+    async function proceedToBooking(totalPassengers) {
+      document.getElementById('cart-container').style.display = 'none';
+      document.getElementById('booking-form-container').style.display = 'block';
+      
+      // Only show passenger inputs for flights
+      const hasFlights = window.cart.some(item => item.type === 'flight');
+      if (hasFlights && totalPassengers > 0) {
+        generatePassengerInputs(totalPassengers);
+      } else {
+        // For hotels/cars, just show the phone field
+        const container = document.getElementById('passenger-inputs');
+        container.innerHTML = '<p style="color: var(--light-text); margin-bottom: 1rem;">Please provide your contact information below.</p>';
+      }
+    }
+
+    function generatePassengerInputs(totalPassengers) {
+      const container = document.getElementById('passenger-inputs');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= totalPassengers; i++) {
+        container.innerHTML += `
+          <div class="passenger-form" data-passenger="${i}" style="border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1rem; margin-bottom: 1rem;">
+            <h4 style="margin-bottom: 1rem;">Passenger ${i}</h4>
+            <div class="form-group">
+              <label for="passenger-first-name-${i}">First Name *</label>
+              <input type="text" id="passenger-first-name-${i}" name="passenger-first-name-${i}" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="passenger-last-name-${i}">Last Name *</label>
+              <input type="text" id="passenger-last-name-${i}" name="passenger-last-name-${i}" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="passenger-dob-${i}">Date of Birth *</label>
+              <input type="date" id="passenger-dob-${i}" name="passenger-dob-${i}" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="passenger-ssn-${i}">SSN *</label>
+              <input type="text" id="passenger-ssn-${i}" name="passenger-ssn-${i}" class="form-control" placeholder="XXX-XX-XXXX" required>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Handle booking form submission
+    const bookingForm = document.getElementById('passenger-booking-form');
+    if (bookingForm) {
+      bookingForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await processBooking();
+      });
+    }
+
+    async function processBooking() {
+      const userPhone = document.getElementById('user-phone').value;
+      const userId = getOrGenerateUserId(userPhone); // Generate unique numeric user-id
+      const bookingNumber = generateBookingNumber();
+      const passengers = [];
+
+      // Collect passenger information (only for flights)
+      const hasFlights = window.cart.some(item => item.type === 'flight');
+      if (hasFlights) {
+        const container = document.getElementById('passenger-inputs');
+        if (container) {
+          const passengerForms = container.querySelectorAll('.passenger-form');
+          
+          passengerForms.forEach((form) => {
+            const passengerNum = form.getAttribute('data-passenger');
+            const firstName = document.getElementById(`passenger-first-name-${passengerNum}`).value;
+            const lastName = document.getElementById(`passenger-last-name-${passengerNum}`).value;
+            const dob = document.getElementById(`passenger-dob-${passengerNum}`).value;
+            const ssn = document.getElementById(`passenger-ssn-${passengerNum}`).value;
+            
+            passengers.push({ firstName, lastName, dob, ssn });
+          });
+        }
+      }
+
+      // Separate cart items by type
+      const flights = window.cart.filter(item => item.type === 'flight');
+      const hotels = window.cart.filter(item => item.type === 'hotel');
+      const cars = window.cart.filter(item => item.type === 'car');
+      const cruises = window.cart.filter(item => item.type === 'cruise');
+
+      // Store flights via PHP
+      if (flights.length > 0) {
+        // Update available seats for each flight via PHP
+        for (const flightItem of flights) {
+          const totalPassengers = flightItem.adultCount + flightItem.childCount + flightItem.infantCount;
+          try {
+            await updateAvailableSeats(flightItem.flightId, totalPassengers);
+          } catch (error) {
+            console.error(`Failed to update seats for flight ${flightItem.flightId}:`, error);
+          }
+        }
+        
+        // Save booking to JSON file via PHP
+        try {
+          const bookingData = {
+            bookingNumber,
+            userId,
+            userPhone,
+            flights,
+            passengers,
+            totalPrice: flights.reduce((sum, item) => sum + item.totalPrice, 0),
+            bookingDate: new Date().toISOString()
+          };
+          
+            const response = await fetch('php/save_flight_booking.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookingData)
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Flight booking saved:', result.message);
+          } else {
+            throw new Error('Failed to save flight booking');
+          }
+        } catch (error) {
+          console.error('Error saving flight booking:', error);
+        }
+      }
+
+      if (hotels.length > 0) {
+        // Update available rooms for each hotel via PHP
+        for (const hotel of hotels) {
+          try {
+            await updateAvailableRooms(hotel.hotelId, hotel.roomsNeeded, hotel.checkIn, hotel.checkOut);
+          } catch (error) {
+            console.error(`Failed to update rooms for hotel ${hotel.hotelId}:`, error);
+          }
+        }
+        
+        // Save bookings to JSON file via PHP
+        for (const hotel of hotels) {
+          try {
+            const bookingData = {
+              bookingNumber: generateBookingNumber(),
+              userId,
+              userPhone,
+              hotelId: hotel.hotelId,
+              city: hotel.city,
+              hotelName: hotel.hotelName,
+              checkIn: hotel.checkIn,
+              checkOut: hotel.checkOut,
+              adultCount: hotel.adultCount,
+              childCount: hotel.childCount,
+              infantCount: hotel.infantCount,
+              roomsNeeded: hotel.roomsNeeded,
+              pricePerNight: hotel.pricePerNight,
+              totalPrice: hotel.totalPrice,
+              bookingDate: new Date().toISOString()
+            };
+            
+            const response = await fetch('php/save_hotel_booking.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(bookingData)
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+            } else {
+              throw new Error('Failed to save hotel booking');
+            }
+          } catch (error) {
+            console.error('Error saving hotel booking:', error);
+          }
+        }
+      }
+
+      // Store cars in XML format via PHP
+      if (cars.length > 0) {
+        // Update available cars (remove from availability) via PHP
+        for (const car of cars) {
+          try {
+            await updateAvailableCars(car.carId);
+          } catch (error) {
+            console.error(`Failed to update car ${car.carId}:`, error);
+          }
+        }
+        
+        // Save bookings to XML file via PHP
+        for (const car of cars) {
+          try {
+            const bookingData = {
+              bookingNumber: generateBookingNumber(),
+              userId,
+              userPhone,
+              carId: car.carId,
+              city: car.city,
+              carType: car.carType,
+              pickupDate: car.pickupDate,
+              dropoffDate: car.dropoffDate,
+              pricePerDay: car.pricePerDay,
+              totalPrice: car.totalPrice,
+              bookingDate: new Date().toISOString()
+            };
+            
+            const response = await fetch('php/save_car_booking.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(bookingData)
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+            } else {
+              throw new Error('Failed to save car booking');
+            }
+          } catch (error) {
+            console.error('Error saving car booking:', error);
+          }
+        }
+      }
+
+      // Store cruise bookings
+      if (cruises.length > 0) {
+        // Cruise bookings should be saved via PHP if needed
+        // For now, just log them
+        cruises.forEach(cruise => {
+          console.log('Cruise booking:', cruise);
+        });
+      }
+
+      // Store passengers reference for display
+      window.lastBookingPassengers = hasFlights ? passengers : [];
+
+      // Display confirmation
+      displayBookingConfirmation(bookingNumber, userId, userPhone, passengers);
+
+      // Clear cart
+      // Clear cart after booking
+      window.cart = [];
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('travelCart');
+      }
+    }
+    
+    function generateBookingNumber() {
+      return 'BK' + Date.now().toString();
+    }
+    
+    // Generate or get unique numeric user-id
+    function getOrGenerateUserId(userPhone) {
+      // Check if user already has an ID (stored by phone number)
+      // Generate user ID - use phone number as unique identifier
+      const userMapping = {};
+      
+      // Generate unique user ID based on phone number hash
+      // This ensures same phone number always gets same user ID
+      const hash = Math.abs(userPhone.split('').reduce((h, char) => {
+        const charCode = char.charCodeAt(0);
+        return ((h << 5) - h) + charCode;
+      }, 0));
+      const userId = hash + 1000;
+      return userId;
+    }
+    
+    function displayBookingConfirmation(bookingNumber, userId, userPhone, passengers = []) {
+      document.getElementById('booking-form-container').style.display = 'none';
+      const confirmation = document.getElementById('booking-confirmation');
+      confirmation.style.display = 'block';
+
+      // Store cart reference before clearing
+      window.lastBookingCart = window.cart;
+      
+      const hasFlights = window.cart.some(item => item.type === 'flight');
+      
+      const totalPrice = window.cart.reduce((sum, item) => sum + item.totalPrice, 0);
+      
+      let html = `
+        <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: var(--border-radius); margin-bottom: 2rem; color: white;">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">✨</div>
+          <h2 style="margin: 0; font-size: 2rem;">Booking Confirmed!</h2>
+          <p style="margin-top: 0.5rem; opacity: 0.9;">Thank you for choosing TravelDeals</p>
+        </div>
+        
+        <div style="background: var(--light-background); padding: 1.5rem; border-radius: var(--border-radius); margin-bottom: 2rem;">
+          <h4 style="margin: 0 0 1rem 0; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">Booking Summary</h4>
+          <div class="results-details" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div class="detail-item">
+              <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">User ID</div>
+              <div class="detail-value" style="font-weight: bold; font-size: 1.1rem; color: var(--primary-color);">${userId}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Booking Number</div>
+              <div class="detail-value" style="font-weight: bold; font-size: 1.1rem; color: var(--primary-color); word-break: break-all;">${bookingNumber}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Contact Phone</div>
+              <div class="detail-value" style="font-size: 1.1rem;">${userPhone}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Total Amount</div>
+              <div class="detail-value" style="font-weight: bold; font-size: 1.3rem; color: var(--secondary-color);">$${totalPrice.toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+        
+        <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">Trip Details</h3>
+      `;
+      
+      // Display passenger information for flights
+      if (hasFlights && passengers && passengers.length > 0) {
+        html += `
+          <h3 style="margin-top: 2rem; margin-bottom: 1.5rem; color: var(--primary-color);">Passenger Information</h3>
+          <div style="border: 2px solid var(--primary-color); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(0,123,255,0.05), rgba(0,123,255,0.02));">
+            <div style="display: grid; gap: 1.5rem;">
+        `;
+        passengers.forEach((passenger, index) => {
+          html += `
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+              <h4 style="margin: 0 0 1rem 0; color: var(--primary-color);">Passenger ${index + 1}</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">First Name</div>
+                  <div class="detail-value" style="font-weight: 500;">${passenger.firstName}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Last Name</div>
+                  <div class="detail-value" style="font-weight: 500;">${passenger.lastName}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Date of Birth</div>
+                  <div class="detail-value">${passenger.dob}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">SSN</div>
+                  <div class="detail-value">${passenger.ssn}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += `
+            </div>
+          </div>
+        `;
+      }
+      
+      // Display booked items
+      window.cart.forEach((item, index) => {
+        if (item.type === 'flight') {
+          const segmentLabel = item.tripSegment === 'outbound' ? 'Outbound' : 'Return';
+          html += `
+            <div style="border: 2px solid var(--primary-color); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(0,123,255,0.05), rgba(0,123,255,0.02));">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <span style="font-size: 2rem; margin-right: 0.5rem;">✈️</span>
+                <h4 style="margin: 0; color: var(--primary-color);">${segmentLabel} Flight</h4>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Flight ID</div>
+                  <div class="detail-value" style="font-weight: bold;">${item.flightId}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Route</div>
+                  <div class="detail-value" style="font-weight: 500;">${item.origin} → ${item.destination}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Departure</div>
+                  <div class="detail-value">${item.departureDate} at ${item.departureTime}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Arrival</div>
+                  <div class="detail-value">${item.arrivalDate} at ${item.arrivalTime}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (item.type === 'hotel') {
+          html += `
+            <div style="border: 2px solid #28a745; border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(40,167,69,0.05), rgba(40,167,69,0.02));">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <span style="font-size: 2rem; margin-right: 0.5rem;">🏨</span>
+                <h4 style="margin: 0; color: #28a745;">Hotel Booking</h4>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Hotel Name</div>
+                  <div class="detail-value" style="font-weight: 500;">${item.hotelName}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">City</div>
+                  <div class="detail-value">${item.city}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Check-in</div>
+                  <div class="detail-value">${item.checkIn}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Check-out</div>
+                  <div class="detail-value">${item.checkOut}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (item.type === 'car') {
+          html += `
+            <div style="border: 2px solid #ff9800; border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(255,152,0,0.05), rgba(255,152,0,0.02));">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <span style="font-size: 2rem; margin-right: 0.5rem;">🚗</span>
+                <h4 style="margin: 0; color: #ff9800;">Car Rental</h4>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Car Type</div>
+                  <div class="detail-value" style="font-weight: 500;">${item.carType}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">City</div>
+                  <div class="detail-value">${item.city}</div>
+                </div>
+              <div class="detail-item">
+                <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Pick-up</div>
+                <div class="detail-value">${item.pickupDate}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Drop-off</div>
+                <div class="detail-value">${item.dropoffDate}</div>
+              </div>
+            </div>
+          `;
+        } else if (item.type === 'cruise') {
+          html += `
+            <div style="border: 2px solid #9c27b0; border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(156,39,176,0.05), rgba(156,39,176,0.02));">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <span style="font-size: 2rem; margin-right: 0.5rem;">🚢</span>
+                <h4 style="margin: 0; color: #9c27b0;">Cruise Booking</h4>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Ship</div>
+                  <div class="detail-value" style="font-weight: 500;">${item.shipName}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Destination</div>
+                  <div class="detail-value">${item.destination}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Departure</div>
+                  <div class="detail-value">${item.departureDate}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label" style="font-size: 0.85rem; color: var(--light-text);">Duration</div>
+                  <div class="detail-value" style="font-weight: 500;">${item.duration} days</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      // Add section showing stored booking information
+      html += `
+        <div style="margin-top: 2rem; padding: 1.5rem; background: #e8f5e9; border-radius: var(--border-radius); border-left: 4px solid #4caf50;">
+          <h4 style="margin: 0 0 1rem 0; color: #4caf50;">💾 Booking Saved to Files</h4>
+          <p style="margin: 0; color: var(--light-text); font-size: 0.9rem;">
+            Your booking data has been saved in the browser's storage.<br>
+            <strong>Format:</strong> JSON (for flights, hotels, cruises) and XML (for cars)<br>
+            <strong>Includes:</strong> User ID, booking number, user phone, all item details, passenger info (for flights)
+          </p>
+        </div>
+      `;
+
+      confirmation.innerHTML = html;
+    }
+    
+    // Update available seats in flights data
+    async function updateAvailableSeats(flightId, seatsToDeduct) {
+      try {
+        const response = await fetch('php/update_flights.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            flightId: flightId,
+            seatsToDeduct: seatsToDeduct
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || 'Failed to update flights');
+        }
+
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error('Error updating available seats:', error);
+        throw error;
+      }
+    }
+    
+    // Update available rooms in hotels.xml via PHP
+    async function updateAvailableRooms(hotelId, roomsToDeduct, checkIn, checkOut) {
+      try {
+        const response = await fetch('php/update_hotels.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            hotelId: hotelId,
+            roomsToDeduct: roomsToDeduct,
+            checkIn: checkIn,
+            checkOut: checkOut
+          })
+        });
+
+        if (!response.ok) {
+          let errorMessage = 'Failed to update hotels';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+            console.error('Error response:', errorData);
+          } catch (e) {
+            // If response is not JSON, get text
+            const errorText = await response.text().catch(() => '');
+            console.error('Error response text:', errorText);
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error('Error updating available rooms:', error);
+        throw error;
+      }
+    }
+    
+    // Update available cars (remove booked car from availability) via PHP
+    async function updateAvailableCars(carId) {
+      try {
+        const response = await fetch('php/update_cars.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            carId: carId
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || 'Failed to update cars');
+        }
+
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error('Error updating available cars:', error);
+        throw error;
+      }
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flights | TravelDeals</title>
+  <link rel="stylesheet" href="css/mystyle.css">
+  <script src="js/dark-mode-init.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header></header>
+    <nav class="main-nav"></nav>
+    <div class="content-wrapper">
+      <aside class="sidebar"></aside>
+      <main class="main-content">
+        <h2>Find Your Flight</h2>
+        <p>Search for the best flight deals to destinations in Texas and California.</p>
+
+        <div class="form-container">
+          <form id="flight-form">
+            <div class="form-group">
+              <label for="trip-type">Trip Type</label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input type="radio" id="one-way" name="trip-type" value="one-way" checked>
+                  <label for="one-way">One Way</label>
+                </div>
+                <div class="radio-option">
+                  <input type="radio" id="round-trip" name="trip-type" value="round-trip">
+                  <label for="round-trip">Round Trip</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="origin">Origin City</label>
+              <input type="text" id="origin" class="form-control" placeholder="e.g., Los Angeles">
+            </div>
+
+            <div class="form-group">
+              <label for="destination">Destination City</label>
+              <input type="text" id="destination" class="form-control" placeholder="e.g., San Francisco">
+            </div>
+
+            <div class="form-group">
+              <label for="departure-date">Departure Date</label>
+              <input type="date" id="departure-date" class="form-control" min="2024-09-01" max="2024-12-01">
+            </div>
+
+            <div class="form-group" id="return-date-group" style="display: none;">
+              <label for="return-date">Return Date</label>
+              <input type="date" id="return-date" class="form-control" min="2024-09-01" max="2024-12-01">
+            </div>
+
+            <div class="form-group">
+              <label>Passengers</label>
+              <div class="passenger-selector">
+                <button type="button" id="passenger-toggle" class="btn-small">👤 Select Passengers</button>
+                <span id="passenger-summary">1 Adult</span>
+              </div>
+
+              <div id="passenger-form"
+                style="display: none; margin-top: 1rem; padding: 1rem; background-color: var(--light-background); border-radius: var(--border-radius);">
+                <div class="passenger-count">
+                  <span>Adults (12+ years)</span>
+                  <button type="button" class="count-btn" id="adult-decrease">-</button>
+                  <span class="count-display" id="adult-count">1</span>
+                  <button type="button" class="count-btn" id="adult-increase">+</button>
+                </div>
+
+                <div class="passenger-count">
+                  <span>Children (2-11 years)</span>
+                  <button type="button" class="count-btn" id="child-decrease">-</button>
+                  <span class="count-display" id="child-count">0</span>
+                  <button type="button" class="count-btn" id="child-increase">+</button>
+                </div>
+
+                <div class="passenger-count">
+                  <span>Infants (under 2 years)</span>
+                  <button type="button" class="count-btn" id="infant-decrease">-</button>
+                  <span class="count-display" id="infant-count">0</span>
+                  <button type="button" class="count-btn" id="infant-increase">+</button>
+                </div>
+
+                <button type="button" id="passenger-done" class="btn-small" style="margin-top: 1rem;">Done</button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Search Flights</button>
+          </form>
+        </div>
+
+        <div id="flight-results" class="results-container">
+          <div class="results-header">
+            <h3>Flight Search Results</h3>
+          </div>
+          <div id="results-content">
+            <!-- Results will be displayed here -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <footer></footer>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
