@@ -277,8 +277,8 @@ function toggleBackgroundColor() {
   document.documentElement.classList.toggle('dark-mode');
   const isDarkMode = document.documentElement.classList.contains('dark-mode');
   // Dark mode is UI only, not part of assignment requirements
-  if (typeof sessionStorage !== 'undefined') {
-    sessionStorage.setItem('darkMode', isDarkMode);
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('darkMode', isDarkMode);
   }
 }
 
@@ -1206,6 +1206,12 @@ async function searchFlights() {
   const totalPassengers = adultCount + childCount + infantCount;
 
   try {
+    // Clear previous results before new search
+    const resultsContent = document.getElementById('results-content');
+    if (resultsContent) {
+      resultsContent.innerHTML = '';
+    }
+    
     // Load data (tries file first, falls back to embedded data)
     const flights = await loadFlightsData();
     const data = { flights: flights };
@@ -1316,7 +1322,9 @@ function displayFlightResults(flights, tripSegment, origin, destination, date, a
   
   html += `</div></div>`;
   
-  if (resultsContent.innerHTML) {
+  // For round-trip, append return flights to existing outbound results
+  // For one-way or new search, replace content
+  if (tripSegment === 'return' && resultsContent.innerHTML && !resultsContent.innerHTML.includes('No flights found')) {
     resultsContent.innerHTML += html;
   } else {
     resultsContent.innerHTML = html;
@@ -1586,6 +1594,12 @@ async function searchCars() {
   const pickupDate = document.getElementById('car-pickup').value;
   const dropoffDate = document.getElementById('car-dropoff').value;
   
+  // Clear previous results summary
+  const resultsSummary = document.getElementById('results-summary');
+  if (resultsSummary) {
+    resultsSummary.textContent = '';
+  }
+  
   try {
     // Load data (tries file first, falls back to embedded data)
     const carsXml = await loadCarsData();
@@ -1631,8 +1645,9 @@ function isDateRangeInRange(carCheckIn, carCheckOut, userPickup, userDropoff) {
   const userIn = new Date(userPickup);
   const userOut = new Date(userDropoff);
   
-  // Check if car's date range overlaps with user's desired dates
-  return (carIn <= userOut && carOut >= userIn);
+  // Check if car is available for the ENTIRE user rental period
+  // Car must be available on or before pickup date AND on or after dropoff date
+  return (carIn <= userIn && carOut >= userOut);
 }
 
 function displayCarResults(cars, city, carType, pickupDate, dropoffDate) {
@@ -1641,6 +1656,9 @@ function displayCarResults(cars, city, carType, pickupDate, dropoffDate) {
   const resultsSummary = document.getElementById('results-summary');
   
   if (!cars || cars.length === 0) {
+    if (resultsSummary) {
+      resultsSummary.textContent = '';
+    }
     resultsContent.innerHTML = '<p>No cars available for your search criteria.</p>';
     resultsContainer.style.display = 'block';
     return;
@@ -1764,18 +1782,26 @@ async function suggestCarsBasedOnBookings(city, pickupDate, dropoffDate) {
         const carBookingsXml = await carBookingsResponse.text();
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(carBookingsXml, 'text/xml');
-        const bookings = xmlDoc.getElementsByTagName('booking');
         
-        for (let i = 0; i < bookings.length; i++) {
-          const booking = bookings[i];
-          previousCarBookings.push({
-            city: booking.getElementsByTagName('city')[0]?.textContent || '',
-            carType: booking.getElementsByTagName('carType')[0]?.textContent || ''
-          });
+        // Check for XML parsing errors
+        const parserError = xmlDoc.querySelector('parsererror');
+        if (parserError) {
+          console.error('XML parsing error in car_bookings.xml:', parserError.textContent);
+        } else {
+          const bookings = xmlDoc.getElementsByTagName('booking');
+          
+          for (let i = 0; i < bookings.length; i++) {
+            const booking = bookings[i];
+            const city = booking.getElementsByTagName('city')[0]?.textContent || '';
+            const carType = booking.getElementsByTagName('carType')[0]?.textContent || '';
+            if (city && carType) {
+              previousCarBookings.push({ city, carType });
+            }
+          }
         }
       }
     } catch (e) {
-      // Silently fail - no previous bookings
+      console.log('Error loading car bookings:', e);
     }
     
     // Load hotel bookings from JSON
@@ -1796,6 +1822,7 @@ async function suggestCarsBasedOnBookings(city, pickupDate, dropoffDate) {
       }
     } catch (e) {
       // Silently fail - no previous bookings
+      console.log('No hotel bookings found or error loading:', e);
     }
     
     // Check if user has previous bookings in this city
@@ -1806,9 +1833,20 @@ async function suggestCarsBasedOnBookings(city, pickupDate, dropoffDate) {
       booking.city && booking.city.toLowerCase() === city.toLowerCase()
     );
     
+    // Debug logging
+    console.log('Suggestions check:', {
+      city: city,
+      sameCityCarBookings: sameCityCarBookings.length,
+      sameCityHotelBookings: sameCityHotelBookings.length,
+      previousCarBookings: previousCarBookings.length,
+      previousHotelBookings: previousHotelBookings.length
+    });
+    
     if (sameCityCarBookings.length > 0 || sameCityHotelBookings.length > 0) {
       // Get preferred car types from previous bookings
       const preferredCarTypes = [...new Set(sameCityCarBookings.map(b => b.carType).filter(Boolean))];
+      
+      console.log('Showing suggestions. Preferred car types:', preferredCarTypes);
       
       // Show suggestions based on previous preferences
       const suggestionsDiv = document.createElement('div');
@@ -1838,9 +1876,22 @@ async function suggestCarsBasedOnBookings(city, pickupDate, dropoffDate) {
         suggestionsDiv.appendChild(typesList);
       }
       
-      const resultsContainer = document.getElementById('cars-results');
-      if (resultsContainer) {
-        resultsContainer.appendChild(suggestionsDiv);
+      // Remove any existing suggestions first
+      const existingSuggestions = document.getElementById('car-suggestions');
+      if (existingSuggestions) {
+        existingSuggestions.remove();
+      }
+      
+      // Append to cars-results-content (inside the results container)
+      const resultsContent = document.getElementById('cars-results-content');
+      if (resultsContent) {
+        resultsContent.appendChild(suggestionsDiv);
+      } else {
+        // Fallback to cars-results container if content div doesn't exist
+        const resultsContainer = document.getElementById('cars-results');
+        if (resultsContainer) {
+          resultsContainer.appendChild(suggestionsDiv);
+        }
       }
     }
   } catch (error) {
